@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/theme.dart';
 
 class SmartSuggestionsList extends StatelessWidget {
-  const SmartSuggestionsList({super.key});
+  final bool isStadiumMode;
+  const SmartSuggestionsList({super.key, this.isStadiumMode = true});
 
   @override
   Widget build(BuildContext context) {
@@ -21,15 +22,15 @@ class SmartSuggestionsList extends StatelessWidget {
         ),
         const SizedBox(height: AppDimens.spacingMd),
         _buildSuggestionCard(
-          icon: Icons.speed,
+          icon: isStadiumMode ? Icons.speed : Icons.person_add_alt_1_outlined,
           iconColor: AppColors.tertiaryFixed,
-          text: 'Use Gate G for 8m faster entry',
+          text: isStadiumMode ? 'Use Gate G for 8m faster entry' : 'Network with attendees before it starts',
         ),
         const SizedBox(height: AppDimens.spacingSm),
         _buildSuggestionCard(
-          icon: Icons.local_cafe,
+          icon: isStadiumMode ? Icons.local_cafe : Icons.wifi,
           iconColor: AppColors.primary,
-          text: 'Concourse B has lowest wait times',
+          text: isStadiumMode ? 'Concourse B has lowest wait times' : 'Connect to TechHub_Guest WiFi',
         ),
       ],
     );
