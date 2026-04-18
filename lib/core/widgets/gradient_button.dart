@@ -6,12 +6,14 @@ class GradientButton extends StatefulWidget {
   final String text;
   final VoidCallback onPressed;
   final Widget? icon;
+  final bool showArrow;
 
   const GradientButton({
     super.key,
     required this.text,
     required this.onPressed,
     this.icon,
+    this.showArrow = true,
   });
 
   @override
@@ -56,8 +58,10 @@ class _GradientButtonState extends State<GradientButton> {
                     color: AppColors.onSurface,
                   ),
                 ),
-                const SizedBox(width: AppDimens.spacingSm),
-                const Icon(Icons.arrow_forward, color: AppColors.onSurface, size: 20),
+                if (widget.showArrow) ...[
+                  const SizedBox(width: AppDimens.spacingSm),
+                  const Icon(Icons.arrow_forward, color: AppColors.onSurface, size: 20),
+                ],
               ],
             ),
           ),

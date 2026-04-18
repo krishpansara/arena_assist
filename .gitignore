@@ -6,8 +6,12 @@
 *.swp
 .buildlog/
 .history
+.env
 
-
+# planning files
+implementation_plan.md
+what_are_we_building.md
+task.md.resolved
 
 # Flutter repo-specific
 /bin/cache/
@@ -117,3 +121,11 @@ app.*.symbols
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
+
+# Python backend
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+backend/.env
+backend/serviceAccountKey.json

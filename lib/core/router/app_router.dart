@@ -1,20 +1,51 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/widgets/app_shell.dart';
-import '../../features/auth/presentation/screens/splash_screen.dart';
-import '../../features/auth/presentation/screens/onboarding_screen.dart';
-import '../../features/auth/presentation/screens/login_screen.dart';
-import '../../features/auth/presentation/screens/register_screen.dart';
-import '../../features/auth/presentation/screens/forgot_password_screen.dart';
-import '../../features/auth/presentation/screens/verify_access_screen.dart';
-import '../../features/ticketing/presentation/screens/add_ticket_screen.dart';
-import '../../features/home/presentation/screens/home_screen.dart';
-import '../../features/profile/presentation/screens/profile_screen.dart';
-import '../../features/profile/presentation/screens/edit_profile_screen.dart';
-import '../../features/settings/presentation/screens/settings_screen.dart';
-import '../../features/settings/presentation/screens/change_password_screen.dart';
-import '../../features/support/presentation/screens/support_screen.dart';
+import 'package:arena_assist/core/widgets/app_shell.dart';
+import 'package:arena_assist/features/auth/presentation/screens/splash_screen.dart';
+import 'package:arena_assist/features/auth/presentation/screens/onboarding_screen.dart';
+import 'package:arena_assist/features/auth/presentation/screens/login_screen.dart';
+import 'package:arena_assist/features/auth/presentation/screens/register_screen.dart';
+import 'package:arena_assist/features/auth/presentation/screens/forgot_password_screen.dart';
+import 'package:arena_assist/features/auth/presentation/screens/verify_access_screen.dart';
+import 'package:arena_assist/features/home/presentation/screens/home_screen.dart';
+import 'package:arena_assist/features/profile/presentation/screens/profile_screen.dart';
+import 'package:arena_assist/features/profile/presentation/screens/edit_profile_screen.dart';
+import 'package:arena_assist/features/settings/presentation/screens/settings_screen.dart';
+import 'package:arena_assist/features/settings/presentation/screens/change_password_screen.dart';
+import 'package:arena_assist/features/support/presentation/screens/support_screen.dart';
+import 'package:arena_assist/features/event_analyzer/presentation/screens/event_analyzer_screen.dart';
+import 'package:arena_assist/features/workshop/presentation/screens/workshop_screen.dart';
+import 'package:arena_assist/features/workshop/presentation/screens/workshop_list_screen.dart';
+import 'package:arena_assist/features/stadium/presentation/screens/stadium_map_detail_screen.dart';
+import 'package:arena_assist/features/auth/presentation/providers/auth_provider.dart';
+import 'package:arena_assist/features/home/domain/models/event_model.dart';
+import 'package:arena_assist/features/venue_map/presentation/screens/venue_location_screen.dart';
+import 'package:arena_assist/features/workshop/presentation/screens/speakers_list_screen.dart';
+import 'package:arena_assist/features/stadium/presentation/screens/event_details_screen.dart';
+import 'package:arena_assist/features/budget/presentation/screens/budget_tracker_screen.dart';
+import 'package:arena_assist/features/stadium/presentation/screens/crowd_flow_screen.dart';
+import 'package:arena_assist/features/food/presentation/screens/food_screen.dart';
+
+EventModel? _parseEvent(Object? extra) {
+  if (extra is EventModel) return extra;
+  if (extra is Map<String, dynamic>) return EventModel.fromJson(extra);
+  if (extra is Map) return EventModel.fromJson(Map<String, dynamic>.from(extra));
+  return null;
+}
+
+List<SpeakerInfo>? _parseSpeakers(Object? extra) {
+  if (extra is List<SpeakerInfo>) return extra;
+  if (extra is List) {
+    try {
+      return extra.map((e) => SpeakerInfo.fromJson(Map<String, dynamic>.from(e))).toList();
+    } catch (_) {
+      return null;
+    }
+  }
+  return null;
+}
 
 // Dummy screen for unbuilt tabs
 class PlaceholderScreen extends StatelessWidget {
@@ -24,9 +55,45 @@ class PlaceholderScreen extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(body: Center(child: Text(title)));
 }
 
-final appRouter = GoRouter(
-  initialLocation: '/',
-  routes: [
+final appRouterProvider = Provider<GoRouter>((ref) {
+  final router = GoRouter(
+    initialLocation: '/',
+    redirect: (context, state) {
+      final authState = ref.read(authStateChangesProvider);
+      
+      if (authState.isLoading) return null;
+
+      final isAuthenticated = authState.valueOrNull != null;
+      final location = state.matchedLocation;
+
+      // Routes that are strictly for authentication
+      final isAuthRoute = location == '/login' ||
+          location == '/register' ||
+          location == '/forgot-password' ||
+          location == '/' || 
+          location == '/onboarding';
+
+      // Feature routes that are accessible by Guests
+      final isPublicRoute = isAuthRoute ||
+          location == '/home' ||
+          location == '/stadium' ||
+          location == '/workshops' ||
+          location == '/workshop' ||
+          location == '/venue_location';
+
+      // If user is not logged in and tries to access a private route, redirect to login
+      if (!isAuthenticated && !isPublicRoute) {
+        return '/login';
+      }
+
+      // If user is logged in and tries to access auth routes, redirect to home
+      if (isAuthenticated && isAuthRoute) {
+        return '/home';
+      }
+
+      return null;
+    },
+    routes: [
     GoRoute(
       path: '/',
       builder: (context, state) => const SplashScreen(),
@@ -52,10 +119,6 @@ final appRouter = GoRouter(
       builder: (context, state) => const VerifyAccessScreen(),
     ),
     GoRoute(
-      path: '/add-ticket',
-      builder: (context, state) => const AddTicketScreen(),
-    ),
-    GoRoute(
       path: '/edit-profile',
       builder: (context, state) => const EditProfileScreen(),
     ),
@@ -70,6 +133,60 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/support',
       builder: (context, state) => const SupportScreen(),
+    ),
+    GoRoute(
+      path: '/event-analyzer',
+      builder: (context, state) => const EventAnalyzerScreen(),
+    ),
+    GoRoute(
+      path: '/workshop',
+      builder: (context, state) {
+        final event = _parseEvent(state.extra);
+        if (event == null) return const PlaceholderScreen('Invalid Event Data');
+        return WorkshopScreen(event: event);
+      },
+    ),
+    GoRoute(
+      path: '/workshops',
+      builder: (context, state) => const WorkshopListScreen(),
+    ),
+    GoRoute(
+      path: '/stadium',
+      builder: (context, state) {
+        final event = _parseEvent(state.extra);
+        return EventDetailsScreen(event: event);
+      },
+    ),
+    GoRoute(
+      path: '/stadium_map',
+      builder: (context, state) => const StadiumMapDetailScreen(),
+    ),
+    GoRoute(
+      path: '/crowd_flow',
+      builder: (context, state) => const CrowdFlowScreen(),
+    ),
+    GoRoute(
+      path: '/budget',
+      builder: (context, state) {
+        final event = _parseEvent(state.extra);
+        if (event == null) return const PlaceholderScreen('Invalid Event Data');
+        return BudgetTrackerScreen(event: event);
+      },
+    ),
+    GoRoute(
+      path: '/venue_location',
+      builder: (context, state) {
+        final event = _parseEvent(state.extra);
+        if (event == null) return const PlaceholderScreen('Invalid Event Data');
+        return VenueLocationScreen(event: event);
+      },
+    ),
+    GoRoute(
+      path: '/workshop_speaker_bios',
+      builder: (context, state) {
+        final speakers = _parseSpeakers(state.extra) ?? [];
+        return SpeakersListScreen(speakers: speakers);
+      },
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
@@ -96,7 +213,7 @@ final appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/food',
-              builder: (context, state) => const PlaceholderScreen('Food & Facilities'),
+              builder: (context, state) => const FoodScreen(),
             ),
           ],
         ),
@@ -120,3 +237,10 @@ final appRouter = GoRouter(
     ),
   ],
 );
+
+  ref.listen(authStateChangesProvider, (_, __) {
+    router.refresh();
+  });
+
+  return router;
+});
