@@ -3,6 +3,7 @@ import json
 import asyncio
 import re
 from groq import AsyncGroq
+import google.generativeai as genai
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
@@ -54,34 +55,48 @@ class EventAnalysisResult(BaseModel):
     budget: BudgetEstimate
     checklist: List[str] = Field(
         description="Packing/prep checklist based on the event (e.g., Laptop, Business casuals)"
-    )
+      )
 
 
-# -- Global client -------------------------------------------------------------
+# -- Global clients -------------------------------------------------------------
 
-_client: AsyncGroq | None = None
+groq_client: AsyncGroq | None = None
+gemini_model: genai.GenerativeModel | None = None
 
 
 def init_llm():
-    global _client
-    api_key = os.getenv("GROQ_API_KEY")
+    global groq_client, gemini_model
+    
+    # Initialize Groq
+    groq_key = os.getenv("GROQ_API_KEY")
+    if groq_key:
+        try:
+            groq_client = AsyncGroq(api_key=groq_key)
+            print("✅ [LLM] Groq client initialized successfully.")
+        except Exception as e:
+            print("❌ [LLM INIT ERROR - Groq]:", str(e))
+    else:
+        print("⚠️ [LLM] GROQ_API_KEY not found in environment.")
 
-    if not api_key:
-        raise ValueError("❌ GROQ_API_KEY is not set in the environment.")
-
-    try:
-        _client = AsyncGroq(api_key=api_key)
-        print("✅ [LLM] Groq client initialized successfully.")
-    except Exception as e:
-        print("❌ [LLM INIT ERROR]:", str(e))
-        raise
+    # Initialize Gemini
+    gemini_key = os.getenv("GEMINI_API_KEY")
+    if gemini_key:
+        try:
+            genai.configure(api_key=gemini_key)
+            # Using 1.5-flash as it's the current stable model
+            gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+            print("✅ [LLM] Gemini client initialized successfully.")
+        except Exception as e:
+            print("❌ [LLM INIT ERROR - Gemini]:", str(e))
+    else:
+        print("⚠️ [LLM] GEMINI_API_KEY not found in environment.")
 
 
 # -- Core synthesis function ---------------------------------------------------
 
 async def synthesize_event_data(raw_text: str, event_url: str) -> dict:
-    if _client is None:
-        raise RuntimeError("❌ LLM not initialised. Call init_llm() first.")
+    if groq_client is None:
+        raise RuntimeError("❌ Groq LLM not initialised. Check GROQ_API_KEY.")
 
     print("🚀 Starting event synthesis...")
 
@@ -146,7 +161,7 @@ RAW WEBSITE TEXT (first 80,000 chars):
     print("📡 Sending request to Groq API...")
 
     try:
-        response = await _client.chat.completions.create(
+        response = await groq_client.chat.completions.create(
             messages=[
                 {"role": "system", "content": system_msg},
                 {"role": "user", "content": prompt},

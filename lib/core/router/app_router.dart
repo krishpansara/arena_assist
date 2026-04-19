@@ -21,12 +21,17 @@ import 'package:arena_assist/features/workshop/presentation/screens/workshop_lis
 import 'package:arena_assist/features/stadium/presentation/screens/stadium_map_detail_screen.dart';
 import 'package:arena_assist/features/auth/presentation/providers/auth_provider.dart';
 import 'package:arena_assist/features/home/domain/models/event_model.dart';
+import 'package:arena_assist/features/home/presentation/screens/event_list_screen.dart';
 import 'package:arena_assist/features/venue_map/presentation/screens/venue_location_screen.dart';
 import 'package:arena_assist/features/workshop/presentation/screens/speakers_list_screen.dart';
 import 'package:arena_assist/features/stadium/presentation/screens/event_details_screen.dart';
 import 'package:arena_assist/features/budget/presentation/screens/budget_tracker_screen.dart';
 import 'package:arena_assist/features/stadium/presentation/screens/crowd_flow_screen.dart';
 import 'package:arena_assist/features/food/presentation/screens/food_screen.dart';
+import 'package:arena_assist/features/stadium/presentation/screens/live_score_screen.dart';
+import 'package:arena_assist/features/transport/presentation/screens/ride_estimator_screen.dart';
+import 'package:arena_assist/features/transcript/presentation/screens/live_transcript_screen.dart';
+import 'package:arena_assist/features/alerts/presentation/screens/alerts_screen.dart';
 
 EventModel? _parseEvent(Object? extra) {
   if (extra is EventModel) return extra;
@@ -66,19 +71,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isAuthenticated = authState.valueOrNull != null;
       final location = state.matchedLocation;
 
-      // Routes that are strictly for authentication
+      // Routes that are strictly for authentication (redirect to home if logged in)
       final isAuthRoute = location == '/login' ||
           location == '/register' ||
-          location == '/forgot-password' ||
           location == '/' || 
           location == '/onboarding';
 
+      // Routes related to authentication but accessible to both
+      final isForgotPassRoute = location == '/forgot-password' || 
+          location == '/verify';
+
       // Feature routes that are accessible by Guests
       final isPublicRoute = isAuthRoute ||
+          isForgotPassRoute ||
           location == '/home' ||
           location == '/stadium' ||
           location == '/workshops' ||
           location == '/workshop' ||
+          location == '/food' ||
+          location == '/food_order' ||
           location == '/venue_location';
 
       // If user is not logged in and tries to access a private route, redirect to login
@@ -162,6 +173,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       builder: (context, state) => const StadiumMapDetailScreen(),
     ),
     GoRoute(
+      path: '/live-score',
+      builder: (context, state) {
+        final event = _parseEvent(state.extra);
+        if (event == null) return const PlaceholderScreen('Invalid Event Data');
+        return LiveScoreScreen(event: event);
+      },
+    ),
+    GoRoute(
+      path: '/ride-estimator',
+      builder: (context, state) {
+        final dest = state.extra as String? ?? '';
+        return RideEstimatorScreen(defaultDestination: dest);
+      },
+    ),
+    GoRoute(
       path: '/crowd_flow',
       builder: (context, state) => const CrowdFlowScreen(),
     ),
@@ -188,6 +214,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return SpeakersListScreen(speakers: speakers);
       },
     ),
+    GoRoute(
+      path: '/food_order',
+      builder: (context, state) {
+        final event = _parseEvent(state.extra);
+        return FoodScreen(event: event);
+      },
+    ),
+    GoRoute(
+      path: '/live_transcript',
+      builder: (context, state) {
+        final event = _parseEvent(state.extra);
+        if (event == null) return const PlaceholderScreen('Invalid Event Data');
+        return LiveTranscriptScreen(event: event);
+      },
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return AppShell(navigationShell: navigationShell);
@@ -204,16 +245,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/map',
-              builder: (context, state) => const PlaceholderScreen('Map / Navigation'),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/food',
-              builder: (context, state) => const FoodScreen(),
+              path: '/events',
+              builder: (context, state) => const EventListScreen(),
             ),
           ],
         ),
@@ -221,7 +254,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           routes: [
             GoRoute(
               path: '/alerts',
-              builder: (context, state) => const PlaceholderScreen('Alerts'),
+              builder: (context, state) => const AlertsScreen(),
             ),
           ],
         ),

@@ -21,7 +21,12 @@ class HomeHeader extends StatelessWidget {
           radius: 20,
           backgroundColor: AppColors.surfaceContainerHigh,
           backgroundImage: userAvatarUrl.isNotEmpty ? NetworkImage(userAvatarUrl) : null,
-          child: userAvatarUrl.isEmpty ? const Icon(Icons.person, color: AppColors.onSurface) : null,
+          onBackgroundImageError: userAvatarUrl.isNotEmpty 
+              ? (exception, stackTrace) => debugPrint('Avatar image error: $exception')
+              : null,
+          child: userAvatarUrl.isEmpty 
+              ? const Icon(Icons.person, color: AppColors.onSurface) 
+              : null,
         ),
         const SizedBox(width: AppDimens.spacingMd),
         Expanded(

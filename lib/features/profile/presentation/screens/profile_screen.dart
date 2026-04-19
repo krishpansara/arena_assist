@@ -1,15 +1,19 @@
+import 'package:arena_assist/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/theme.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_option_tile.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(userDataProvider).valueOrNull;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -29,9 +33,9 @@ class ProfileScreen extends StatelessWidget {
         ),
         child: Column(
           children: [
-            const ProfileHeader(
-              name: 'Alex Sterling',
-              email: 'alex.sterling@vibe-elite.com',
+            ProfileHeader(
+              name: user?.name ?? 'Guest',
+              email: user?.email ?? 'No email available',
             ),
             const SizedBox(height: AppDimens.spacing4xl),
             ProfileOptionTile(
@@ -63,7 +67,7 @@ class ProfileScreen extends StatelessWidget {
               title: 'Logout',
               isDestructive: true,
               onTap: () {
-                context.go('/login');
+                ref.read(authControllerProvider.notifier).signOut();
               },
             ),
           ],

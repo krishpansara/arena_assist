@@ -9,6 +9,7 @@ class AppCard extends StatefulWidget {
   final EdgeInsetsGeometry padding;
   final Color? backgroundColor;
   final bool borderEnabled;
+  final Color? borderColor;
 
   const AppCard({
     super.key,
@@ -17,6 +18,7 @@ class AppCard extends StatefulWidget {
     this.padding = const EdgeInsets.all(AppDimens.spacingLg),
     this.backgroundColor,
     this.borderEnabled = true,
+    this.borderColor,
   });
 
   @override
@@ -54,11 +56,11 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
         color: bgColor,
         borderRadius: BorderRadius.circular(AppDimens.radiusXl),
         border: widget.borderEnabled
-            ? Border.all(color: AppColors.outlineVariant.withOpacity(0.1))
+            ? Border.all(color: widget.borderColor ?? AppColors.outlineVariant.withValues(alpha: 0.1))
             : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )

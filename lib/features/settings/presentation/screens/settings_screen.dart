@@ -1,4 +1,6 @@
+import 'package:arena_assist/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/theme.dart';
@@ -7,11 +9,13 @@ import '../widgets/settings_list_tile.dart';
 import '../widgets/settings_section_header.dart';
 import '../widgets/settings_toggle_tile.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userAsync = ref.watch(userDataProvider);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -77,15 +81,23 @@ class SettingsScreen extends StatelessWidget {
             ),
             SettingsCard(
               children: [
-                SettingsListTile(
-                  icon: Icons.email_outlined,
-                  title: 'Email Address',
-                  subtitle: 'alex.sterling@elite.com',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Edit Email coming soon')),
-                    );
-                  },
+                userAsync.when(
+                  data: (user) => SettingsListTile(
+                    icon: Icons.person_add_alt_1_outlined,
+                    title: 'Edit Profile',
+                    subtitle: user!.name,
+                    onTap: () => context.push('/edit-profile'),
+                  ),
+                  loading: () => const Center(child: Padding(
+                    padding: EdgeInsets.all(AppDimens.spacingLg),
+                    child: CircularProgressIndicator(),
+                  )),
+                  error: (e, _) => SettingsListTile(
+                    icon: Icons.error_outline,
+                    title: 'Profile',
+                    subtitle: 'Error loading profile',
+                    onTap: () {},
+                  ),
                 ),
                 Divider(color: AppColors.outlineVariant.withValues(alpha: 0.3), height: 1),
                 SettingsListTile(
@@ -201,34 +213,7 @@ class SettingsScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppDimens.spacing4xl),
-
-            // SIGN OUT BUTTON
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () {
-                  context.go('/login');
-                },
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: AppDimens.spacingLg),
-                  side: BorderSide(color: AppColors.error.withValues(alpha: 0.3)),
-                  backgroundColor: AppColors.error.withValues(alpha: 0.05),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppDimens.radiusMd),
-                  ),
-                ),
-                child: Text(
-                  'SIGN OUT ACCOUNT',
-                  style: AppTextStyles.labelLarge.copyWith(
-                    color: AppColors.errorDim,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppDimens.spacingMd),
-            
+               
             // DELETE ACCOUNT BUTTON
             SizedBox(
               width: double.infinity,

@@ -30,10 +30,9 @@ class AppShell extends StatelessWidget {
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           destinations: [
             _buildDestination(0, Icons.home_filled, Icons.home_outlined, 'HOME'),
-            _buildDestination(1, Icons.map, Icons.map_outlined, 'MAP'),
-            _buildDestination(2, Icons.fastfood, Icons.fastfood_outlined, 'FOOD'),
-            _buildDestination(3, Icons.notifications, Icons.notifications_outlined, 'ALERTS', hasBadge: true),
-            _buildDestination(4, Icons.person, Icons.person_outline, 'PROFILE'),
+            _buildDestination(1, Icons.event, Icons.event_outlined, 'EVENTS'),
+            _buildDestination(2, Icons.notifications, Icons.notifications_outlined, 'ALERTS', hasBadge: true),
+            _buildDestination(3, Icons.person, Icons.person_outline, 'PROFILE'),
           ],
         ),
       ),

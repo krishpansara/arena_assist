@@ -9,7 +9,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from backend.scraper import scrape_event_website
-from backend.llm import synthesize_event_data, init_llm
+# from backend.llm import synthesize_event_data, init_llm
+# from backend.llm import synthesize_event_data, generate_transcript_insights, init_llm
+from backend.llm import init_llm
+from backend.event_analyzer import synthesize_event_data
+from backend.transcript_summarizer import generate_transcript_insights
 from backend.database import init_firestore, save_event_to_firestore
 
 
@@ -46,6 +50,10 @@ app.add_middleware(
 class AnalyzeRequest(BaseModel):
     url: str        # URL to analyze
     type: str = "url" # "url" | "name"
+
+
+class TranscriptRequest(BaseModel):
+    transcript: str
 
 
 class AnalyzeResponse(BaseModel):
@@ -108,6 +116,22 @@ async def analyze_event(req: AnalyzeRequest):
     print(f"[API] Done - event: {synthesized.get('event_name', 'Unknown')}")
 
     return AnalyzeResponse(status="success", doc_id=doc_id, data=synthesized)
+
+
+@app.post("/api/v1/transcript/insights")
+async def get_transcript_insights(req: TranscriptRequest):
+    """
+    Calls Gemini to extract insights from a raw transcript.
+    """
+    if not req.transcript.strip():
+        raise HTTPException(status_code=400, detail="Transcript cannot be empty.")
+
+    try:
+        insights = await generate_transcript_insights(req.transcript)
+        return {"status": "success", "data": insights}
+    except Exception as e:
+        print("❌ TRANSCRIPT LLM ERROR:", str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to generate insights: {e}")
 
 
 if __name__ == "__main__":

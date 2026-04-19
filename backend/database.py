@@ -1,9 +1,28 @@
 import os
 import firebase_admin
 from firebase_admin import credentials, firestore
+import re
 from datetime import datetime, timezone
 
 _db = None
+
+def _parse_fee(price_str: str) -> tuple[bool, float | None]:
+    """
+    Parses a price string to determine if it is free and extracts the numeric value if any.
+    Returns a tuple of (is_free, amount).
+    """
+    s = str(price_str).lower().strip()
+    if any(x in s for x in ['free', 'complimentary', 'no cost', '0']):
+        return True, 0.0
+
+    match = re.search(r'[\d,]+\.?\d*', s)
+    if match:
+        try:
+            return False, float(match.group().replace(',', ''))
+        except ValueError:
+            pass
+
+    return False, None
 
 
 def init_firestore():
@@ -41,6 +60,13 @@ async def save_event_to_firestore(event_data: dict, source_url: str) -> str | No
 
     try:
         doc_ref = db.collection("analyzed_events").document()
+        
+        # Add fee logic
+        price_str = event_data.get("price", "")
+        is_free, amount = _parse_fee(price_str)
+        event_data["isFree"] = is_free
+        event_data["entryFee"] = amount
+        
         payload = {
             **event_data,
             "source_url": source_url,

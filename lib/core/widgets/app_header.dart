@@ -93,7 +93,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
           const SizedBox(width: AppDimens.spacingMd),
           const CircleAvatar(
             radius: 12,
-            backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=krish'),
+            backgroundImage: const NetworkImage('https://ui-avatars.com/api/?name=Krish&background=random'),
           ),
         ],
         const SizedBox(width: AppDimens.spacingXl),

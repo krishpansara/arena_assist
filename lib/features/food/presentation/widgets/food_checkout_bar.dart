@@ -55,7 +55,7 @@ class FoodCheckoutBar extends StatelessWidget {
                   style: AppTextStyles.labelSmall.copyWith(color: AppColors.onSurfaceVariant),
                 ),
                 Text(
-                  '\$32.50',
+                  '₹32.50',
                   style: AppTextStyles.titleLarge.copyWith(fontWeight: FontWeight.w900),
                 ),
               ],

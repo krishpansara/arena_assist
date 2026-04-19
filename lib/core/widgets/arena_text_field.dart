@@ -11,6 +11,7 @@ class ArenaTextField extends StatefulWidget {
   final String? Function(String?)? validator;
   final ValueChanged<String>? onChanged;
   final Widget? labelTrailing;
+  final bool? enabled;
 
   const ArenaTextField({
     super.key,
@@ -22,6 +23,7 @@ class ArenaTextField extends StatefulWidget {
     this.validator,
     this.onChanged,
     this.labelTrailing,
+    this.enabled,
   });
 
   @override
@@ -54,6 +56,7 @@ class _ArenaTextFieldState extends State<ArenaTextField> {
         ),
         TextFormField(
           controller: widget.controller,
+          enabled: widget.enabled,
           obscureText: widget.isPassword ? _obscureText : false,
           validator: widget.validator,
           onChanged: widget.onChanged,

@@ -4,16 +4,18 @@ import '../theme/theme.dart';
 
 class GradientButton extends StatefulWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final Widget? icon;
   final bool showArrow;
+  final bool isLoading;
 
   const GradientButton({
     super.key,
     required this.text,
-    required this.onPressed,
+    this.onPressed,
     this.icon,
     this.showArrow = true,
+    this.isLoading = false,
   });
 
   @override
@@ -33,37 +35,54 @@ class _GradientButtonState extends State<GradientButton> {
         onTapDown: (_) => setState(() => _isPressed = true),
         onTapUp: (_) => setState(() => _isPressed = false),
         onTapCancel: () => setState(() => _isPressed = false),
-        onTap: widget.onPressed,
+        onTap: widget.isLoading ? null : widget.onPressed,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           height: AppDimens.buttonHeightLg,
           decoration: BoxDecoration(
-            gradient: AppColors.primaryGradient,
+            gradient: widget.onPressed == null || widget.isLoading
+                ? LinearGradient(
+                    colors: [
+                      AppColors.primary.withValues(alpha: 0.5),
+                      AppColors.primaryDim.withValues(alpha: 0.5),
+                    ],
+                  )
+                : AppColors.primaryGradient,
             borderRadius: BorderRadius.circular(AppDimens.radiusXl),
             boxShadow: _isHovered || _isPressed
                 ? AppShadows.primaryHoverGlow
                 : AppShadows.primaryGlowSmall,
           ),
           child: Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (widget.icon != null) ...[
-                  widget.icon!,
-                  const SizedBox(width: AppDimens.spacingSm),
-                ],
-                Text(
-                  widget.text,
-                  style: AppTextStyles.titleMedium.copyWith(
-                    color: AppColors.onSurface,
+            child: widget.isLoading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      color: AppColors.onSurface,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (widget.icon != null) ...[
+                        widget.icon!,
+                        const SizedBox(width: AppDimens.spacingSm),
+                      ],
+                      Text(
+                        widget.text,
+                        style: AppTextStyles.titleMedium.copyWith(
+                          color: AppColors.onSurface,
+                        ),
+                      ),
+                      if (widget.showArrow) ...[
+                        const SizedBox(width: AppDimens.spacingSm),
+                        const Icon(Icons.arrow_forward,
+                            color: AppColors.onSurface, size: 20),
+                      ],
+                    ],
                   ),
-                ),
-                if (widget.showArrow) ...[
-                  const SizedBox(width: AppDimens.spacingSm),
-                  const Icon(Icons.arrow_forward, color: AppColors.onSurface, size: 20),
-                ],
-              ],
-            ),
           ),
         ),
       ),

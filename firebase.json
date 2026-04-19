@@ -1,0 +1,33 @@
+{
+  "firestore": {
+    "indexes": "firestore.indexes.json"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "arena-assist",
+          "appId": "1:629801883884:android:bbf9a3353046a998e1edc9",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "arena-assist",
+          "configurations": {
+            "android": "1:629801883884:android:bbf9a3353046a998e1edc9",
+            "ios": "1:629801883884:ios:bac6f9af836bb67de1edc9",
+            "macos": "1:629801883884:ios:bac6f9af836bb67de1edc9",
+            "web": "1:629801883884:web:cf221330c664d03ae1edc9",
+            "windows": "1:629801883884:web:ffacf4bb50e8634ce1edc9"
+          }
+        }
+      }
+    }
+  },
+  "auth": {
+    "providers": {
+      "emailPassword": true
+    }
+  }
+}

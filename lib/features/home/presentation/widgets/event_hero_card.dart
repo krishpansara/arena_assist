@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/theme.dart';
+import 'package:arena_assist/core/theme/theme.dart';
+import 'package:arena_assist/features/home/domain/models/event_model.dart';
 
 class EventHeroCard extends StatelessWidget {
-  final bool isStadiumMode;
-  const EventHeroCard({super.key, this.isStadiumMode = true});
+  final EventModel event;
+  const EventHeroCard({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +23,7 @@ class EventHeroCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  isStadiumMode ? 'Champions League\nFinals' : 'Advanced Flutter\nWorkshop',
+                  event.title,
                   style: AppTextStyles.headlineMedium.copyWith(
                     fontWeight: FontWeight.bold,
                     foreground: Paint()
@@ -32,37 +33,38 @@ class EventHeroCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: AppDimens.spacingMd, vertical: AppDimens.spacingXs),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(AppDimens.radiusFull),
-                  border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.5)),
-                ),
-                child: Text(
-                  'LIVE',
-                  style: AppTextStyles.labelSmall.copyWith(
-                    color: AppColors.onSurface,
-                    letterSpacing: 1.0,
-                    fontWeight: FontWeight.bold,
+              if (event.isLive)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: AppDimens.spacingMd, vertical: AppDimens.spacingXs),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(AppDimens.radiusFull),
+                    border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.5)),
                   ),
-                ),
-              )
+                  child: Text(
+                    'LIVE',
+                    style: AppTextStyles.labelSmall.copyWith(
+                      color: AppColors.onSurface,
+                      letterSpacing: 1.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                )
             ],
           ),
           const SizedBox(height: AppDimens.spacingSm),
           Text(
-            isStadiumMode ? 'Tonight, 19:30 • Metropolis Arena' : 'Today, 10:00 • Tech Hub Room 4',
+            '${event.location} • ${event.startTime.hour}:${event.startTime.minute.toString().padLeft(2, '0')}',
             style: AppTextStyles.bodyMedium.copyWith(color: AppColors.onSurfaceVariant),
           ),
           const SizedBox(height: AppDimens.spacingXl),
           Row(
             children: [
-              _buildSeatPod(isStadiumMode ? 'SECTION' : 'ROOM', isStadiumMode ? '112' : '4B'),
+              _buildSeatPod(event.type == EventType.stadium ? 'SECTION' : 'ROOM', event.section),
               const SizedBox(width: AppDimens.spacingSm),
-              _buildSeatPod('ROW', isStadiumMode ? 'AA' : '3'),
+              _buildSeatPod('ROW', event.row),
               const SizedBox(width: AppDimens.spacingSm),
-              _buildSeatPod('SEAT', isStadiumMode ? '14' : '12'),
+              _buildSeatPod('SEAT', event.seat),
             ],
           ),
           const SizedBox(height: AppDimens.spacingXl),
@@ -79,7 +81,7 @@ class EventHeroCard extends StatelessWidget {
                 const Icon(Icons.timer_outlined, color: AppColors.secondary, size: 20),
                 const SizedBox(width: AppDimens.spacingSm),
                 Text(
-                  isStadiumMode ? 'Starts in 45 mins' : 'Starts in 15 mins',
+                  event.timeStatus,
                   style: AppTextStyles.labelLarge.copyWith(
                     color: AppColors.secondary,
                     fontWeight: FontWeight.bold,
