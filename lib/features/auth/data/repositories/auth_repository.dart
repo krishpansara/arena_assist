@@ -100,6 +100,39 @@ class AuthRepository {
     await _firebaseAuth.signOut();
   }
 
+  Future<void> updateUserProfile({
+    required String name,
+    String? phoneNumber,
+  }) async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user == null) {
+        throw Exception('User is not logged in');
+      }
+
+      await user.updateDisplayName(name);
+
+      await _firestore.collection('users').doc(user.uid).update({
+        'name': name,
+        'phoneNumber': phoneNumber,
+      });
+    } on FirebaseAuthException catch (e) {
+      throw _handleFirebaseException(e);
+    } catch (e) {
+      throw Exception('An unexpected error occurred: $e');
+    }
+  }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      throw _handleFirebaseException(e);
+    } catch (e) {
+      throw Exception('An unexpected error occurred: $e');
+    }
+  }
+
   Exception _handleFirebaseException(FirebaseAuthException e) {
     switch (e.code) {
       case 'user-not-found':

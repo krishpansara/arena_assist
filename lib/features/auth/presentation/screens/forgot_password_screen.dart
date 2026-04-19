@@ -1,15 +1,56 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/arena_text_field.dart';
 import '../../../../core/widgets/gradient_button.dart';
+import '../providers/auth_provider.dart';
 
-class ForgotPasswordScreen extends StatelessWidget {
+class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
+  ConsumerState<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+}
+
+class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
+  final _emailController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  void _handleResetPassword() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your email address')),
+      );
+      return;
+    }
+
+    try {
+      await ref.read(authControllerProvider.notifier).forgotPassword(email);
+      if (mounted) {
+        // Navigate to verify access as a mock flow (per original design)
+        context.push('/verify');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+        );
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authControllerProvider);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -47,7 +88,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    gradient: AppColors.secondaryGradient, // Using secondary for the purple look
+                    gradient: AppColors.secondaryGradient,
                     borderRadius: BorderRadius.circular(AppDimens.radiusLg),
                   ),
                   child: const Center(
@@ -94,18 +135,18 @@ class ForgotPasswordScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: AppDimens.spacing3xl),
                   ArenaTextField(
+                    controller: _emailController,
                     label: 'EMAIL ADDRESS',
                     hint: 'name@stadium.live',
                     prefixIcon: Icons.email_outlined,
                   ),
                   const SizedBox(height: AppDimens.spacing3xl),
-                  GradientButton(
-                    text: 'SEND RESET LINK',
-                    onPressed: () {
-                      // Navigate to verify access as a mock flow
-                      context.push('/verify');
-                    },
-                  ),
+                  authState.isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : GradientButton(
+                          text: 'SEND RESET LINK',
+                          onPressed: _handleResetPassword,
+                        ),
                 ],
               ),
             ),
@@ -120,7 +161,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                   style: AppTextStyles.bodyMedium.copyWith(color: AppColors.onSurfaceVariant),
                 ),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: _handleResetPassword,
                   child: Text(
                     'Resend code',
                     style: AppTextStyles.bodyMedium.copyWith(

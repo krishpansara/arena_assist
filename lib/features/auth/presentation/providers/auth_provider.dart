@@ -72,6 +72,34 @@ class AuthController extends AsyncNotifier<void> {
       state = AsyncValue.error(e, stackTrace);
     }
   }
+
+  Future<void> forgotPassword(String email) async {
+    state = const AsyncValue.loading();
+    try {
+      await ref.read(authRepositoryProvider).sendPasswordResetEmail(email);
+      state = const AsyncValue.data(null);
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+      rethrow;
+    }
+  }
+
+  Future<void> updateProfile({
+    required String name,
+    String? phoneNumber,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      await ref.read(authRepositoryProvider).updateUserProfile(
+            name: name,
+            phoneNumber: phoneNumber,
+          );
+      state = const AsyncValue.data(null);
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+      rethrow;
+    }
+  }
 }
 
 final authControllerProvider = AsyncNotifierProvider<AuthController, void>(() {

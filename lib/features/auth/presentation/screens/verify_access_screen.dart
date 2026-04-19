@@ -113,7 +113,7 @@ class VerifyAccessScreen extends StatelessWidget {
                     GradientButton(
                       text: 'AUTHORIZE DEVICE',
                       onPressed: () {
-                         context.go('/add-ticket');
+                         context.go('/login');
                       },
                     ),
                     const SizedBox(height: AppDimens.spacingXl),
