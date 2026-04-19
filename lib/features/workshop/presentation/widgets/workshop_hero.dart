@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/theme.dart';
+import 'package:arena_assist/core/theme/theme.dart';
+import 'package:arena_assist/features/home/domain/models/event_model.dart';
 
 class WorkshopHero extends StatelessWidget {
-  const WorkshopHero({super.key});
+  final EventModel event;
+  const WorkshopHero({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {
+    final firstSpeaker = event.speakers?.firstOrNull?.name ?? 'Assigned Speaker';
+    
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppDimens.spacingXl),
       padding: const EdgeInsets.all(AppDimens.spacingXl),
@@ -28,14 +32,14 @@ class WorkshopHero extends StatelessWidget {
                 Container(
                   width: 8,
                   height: 8,
-                  decoration: const BoxDecoration(
-                    color: AppColors.tertiaryFixed,
+                  decoration: BoxDecoration(
+                    color: event.isLive ? AppColors.tertiaryFixed : AppColors.onSurfaceVariant.withValues(alpha: 0.5),
                     shape: BoxShape.circle,
                   ),
                 ),
                 const SizedBox(width: AppDimens.spacingSm),
                 Text(
-                  'LIVE NOW',
+                  event.isLive ? 'LIVE NOW' : (event.isCompleted ? 'COMPLETED' : 'UPCOMING'),
                   style: AppTextStyles.labelSmall.copyWith(
                     color: AppColors.onSurfaceVariant,
                     fontWeight: FontWeight.bold,
@@ -47,7 +51,7 @@ class WorkshopHero extends StatelessWidget {
           ),
           const SizedBox(height: AppDimens.spacingLg),
           Text(
-            'Generative AI\nWorkshop',
+            event.title.replaceFirst(' ', '\n'),
             style: AppTextStyles.headlineMedium.copyWith(
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -58,7 +62,10 @@ class WorkshopHero extends StatelessWidget {
             children: [
               const Icon(Icons.access_time_filled, color: AppColors.primary, size: 16),
               const SizedBox(width: AppDimens.spacingMd),
-              Text('10:00 AM — 11:30 AM', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.onSurfaceVariant)),
+              Text(
+                '${event.startTime.hour}:${event.startTime.minute.toString().padLeft(2, '0')} — ${event.startTime.add(const Duration(hours: 1, minutes: 30)).hour}:${event.startTime.add(const Duration(hours: 1, minutes: 30)).minute.toString().padLeft(2, '0')}', 
+                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.onSurfaceVariant)
+              ),
             ],
           ),
           const SizedBox(height: AppDimens.spacingSm),
@@ -66,9 +73,10 @@ class WorkshopHero extends StatelessWidget {
             children: [
               const Icon(Icons.person, color: AppColors.primary, size: 16),
               const SizedBox(width: AppDimens.spacingMd),
-              Text('Dr. Sarah Chen', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.onSurfaceVariant)),
+              Text(firstSpeaker, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.onSurfaceVariant)),
             ],
           ),
+
           const SizedBox(height: AppDimens.spacingXxl),
           Container(
             padding: const EdgeInsets.all(AppDimens.spacingXl),

@@ -1,52 +1,39 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/theme.dart';
+import 'package:arena_assist/core/theme/theme.dart';
+import 'package:arena_assist/features/home/domain/models/event_model.dart';
 
 class WorkshopUpcomingSessions extends StatelessWidget {
-  const WorkshopUpcomingSessions({super.key});
+  final List<SessionInfo> sessions;
+  const WorkshopUpcomingSessions({super.key, required this.sessions});
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppDimens.spacingXl),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                'Upcoming Sessions',
-                style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.bold),
-              ),
-              GestureDetector(
-                onTap: () {},
-                child: Text(
-                  'SEE ALL',
-                  style: AppTextStyles.labelSmall.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-              ),
-            ],
+          child: Text(
+            'UPCOMING SESSIONS',
+            style: AppTextStyles.labelLarge.copyWith(
+              color: AppColors.onSurfaceVariant,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.5,
+            ),
           ),
         ),
         const SizedBox(height: AppDimens.spacingLg),
-        _buildSessionCard(
-          time: '1:00\nPM',
-          title: 'Deep Learning Architectures',
-          tags: ['AI', 'ML'],
-          tagColor: AppColors.primary,
-        ),
-        const SizedBox(height: AppDimens.spacingLg),
-        _buildSessionCard(
-          time: '2:45\nPM',
-          title: 'Ethics in Modern Robotics',
-          tags: ['POLICY', 'AI'],
-          tagColor: AppColors.tertiaryFixed,
-        ),
+        ...sessions.map((session) => Column(
+          children: [
+            _buildSessionCard(
+              time: session.time,
+              title: session.title,
+              tags: [session.speaker], // Using speaker as a tag for now
+              tagColor: AppColors.primary,
+            ),
+            const SizedBox(height: AppDimens.spacingLg),
+          ],
+        )),
       ],
     );
   }

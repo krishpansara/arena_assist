@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/theme.dart';
+import 'package:arena_assist/core/theme/theme.dart';
 
 class AssistantPulse extends StatelessWidget {
   const AssistantPulse({super.key});

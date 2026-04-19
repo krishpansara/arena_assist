@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/theme/theme.dart';
+import 'package:arena_assist/core/theme/theme.dart';
+import 'package:arena_assist/features/home/domain/models/event_model.dart';
 
 class WorkshopHeader extends StatelessWidget {
-  const WorkshopHeader({super.key});
+  final EventModel event;
+  const WorkshopHeader({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {

@@ -1,82 +1,51 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/theme.dart';
-import '../widgets/workshop_header.dart';
-import '../widgets/workshop_hero.dart';
-import '../widgets/workshop_action_grid.dart';
-import '../widgets/workshop_upcoming_sessions.dart';
-import '../widgets/assistant_pulse.dart';
-import '../widgets/workshop_speaker_bios.dart';
+import 'package:arena_assist/core/theme/theme.dart';
+import 'package:arena_assist/core/widgets/app_header.dart';
+import 'package:arena_assist/features/home/domain/models/event_model.dart';
+import 'package:arena_assist/features/workshop/presentation/widgets/workshop_hero.dart';
+import 'package:arena_assist/features/workshop/presentation/widgets/workshop_action_grid.dart';
+import 'package:arena_assist/features/workshop/presentation/widgets/workshop_upcoming_sessions.dart';
+import 'package:arena_assist/features/workshop/presentation/widgets/assistant_pulse.dart';
+import 'package:arena_assist/features/workshop/presentation/widgets/workshop_speaker_bios.dart';
 
 class WorkshopScreen extends StatelessWidget {
-  const WorkshopScreen({super.key});
+  final EventModel event;
+
+  const WorkshopScreen({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface, // Ensure dark background
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: AppDimens.spacingXl),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: const [
-              WorkshopHeader(),
-              SizedBox(height: AppDimens.spacingXxl),
-              WorkshopHero(),
-              SizedBox(height: AppDimens.spacingXxl),
-              WorkshopActionGrid(),
-              SizedBox(height: AppDimens.spacingXxl),
-              WorkshopUpcomingSessions(),
-              SizedBox(height: AppDimens.spacingXxl),
-              WorkshopSpeakerBios(),
-              SizedBox(height: AppDimens.spacingXxl),
-              AssistantPulse(),
-              SizedBox(height: 100), // padding for floating action button
+      backgroundColor: AppColors.surface,
+      appBar: AppHeader(title: event.title, showProfile: true),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(vertical: AppDimens.spacingXl),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: AppDimens.spacingLg),
+            WorkshopHero(event: event),
+            const SizedBox(height: AppDimens.spacingXl),
+            WorkshopActionGrid(event: event),
+            const SizedBox(height: AppDimens.spacingXl),
+            // const Padding(
+            //   padding: EdgeInsets.symmetric(horizontal: AppDimens.spacingXl),
+            //   child: FoodVendorList(isStadiumMode: false),
+            // ),
+            const SizedBox(height: AppDimens.spacingXl),
+            if (event.sessions != null && event.sessions!.isNotEmpty) ...[
+              WorkshopUpcomingSessions(sessions: event.sessions!),
+              const SizedBox(height: AppDimens.spacingXl),
             ],
-          ),
+            if (event.speakers != null && event.speakers!.isNotEmpty) ...[
+              WorkshopSpeakerBios(speakers: event.speakers!),
+              const SizedBox(height: AppDimens.spacingXl),
+            ],
+            const AssistantPulse(),
+            const SizedBox(height: 100),
+          ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
-      bottomNavigationBar: _buildWorkshopBottomNav(),
-    );
-  }
-
-  Widget _buildWorkshopBottomNav() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
-        border: Border(
-          top: BorderSide(
-            color: AppColors.outlineVariant.withValues(alpha: 0.2),
-            width: 1,
-          ),
-        ),
-      ),
-      child: NavigationBar(
-        selectedIndex: 0,
-        backgroundColor: Colors.transparent,
-        indicatorColor: Colors.transparent,
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        destinations: [
-          const NavigationDestination(icon: Icon(Icons.home_filled, color: AppColors.primary), label: 'HOME'),
-          const NavigationDestination(icon: Icon(Icons.map_outlined, color: AppColors.onSurfaceVariant), label: 'MAP'),
-          const NavigationDestination(icon: Icon(Icons.calendar_view_day_outlined, color: AppColors.onSurfaceVariant), label: 'SCHEDULE'),
-          NavigationDestination(
-            icon: Badge(
-              backgroundColor: AppColors.error,
-              smallSize: 8,
-              child: const Icon(Icons.notifications_outlined, color: AppColors.onSurfaceVariant),
-            ),
-            label: 'ALERTS',
-          ),
-          const NavigationDestination(icon: Icon(Icons.person_outline, color: AppColors.onSurfaceVariant), label: 'PROFILE'),
-        ],
       ),
     );
   }
 }
-

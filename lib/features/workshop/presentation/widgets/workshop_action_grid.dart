@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/theme/theme.dart';
+import 'package:arena_assist/core/theme/theme.dart';
+import 'package:arena_assist/features/home/domain/models/event_model.dart';
 
 class WorkshopActionGrid extends StatelessWidget {
-  const WorkshopActionGrid({super.key});
+  final EventModel event;
+  const WorkshopActionGrid({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +29,7 @@ class WorkshopActionGrid extends StatelessWidget {
                   icon: Icons.groups,
                   title: 'SPEAKER BIOS',
                   iconColor: AppColors.primary,
-                  onTap: () => context.push('/workshop_speaker_bios'),
+                  onTap: () => context.push('/workshop_speaker_bios', extra: event.speakers ?? []),
                 ),
               ),
             ],
@@ -45,11 +47,49 @@ class WorkshopActionGrid extends StatelessWidget {
               const SizedBox(width: AppDimens.spacingLg),
               Expanded(
                 child: _buildActionBtn(
-                  icon: Icons.map,
-                  title: 'CAMPUS MAP',
-                  iconColor: AppColors.secondary,
+                  icon: Icons.mic,
+                  title: 'TRANSCRIBE',
+                  iconColor: AppColors.error,
+                  onTap: () => context.push('/live_transcript', extra: event),
                 ),
               ),
+            ],
+          ),
+          const SizedBox(height: AppDimens.spacingLg),
+          Row(
+            children: [
+              Expanded(
+                child: _buildActionBtn(
+                  icon: Icons.location_on_outlined,
+                  title: 'VENUE LOCATION',
+                  iconColor: AppColors.secondary,
+                  onTap: () => context.push('/venue_location', extra: event),
+                ),
+              ),
+              const SizedBox(width: AppDimens.spacingLg),
+              Expanded(
+                child: _buildActionBtn(
+                  icon: Icons.account_balance_wallet,
+                  title: 'BUDGET TRACKER',
+                  iconColor: AppColors.primary,
+                  onTap: () => context.push('/budget', extra: event),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppDimens.spacingLg),
+          Row(
+            children: [
+              Expanded(
+                child: _buildActionBtn(
+                  icon: Icons.restaurant,
+                  title: 'ORDER FOOD',
+                  iconColor: AppColors.tertiaryFixed,
+                  onTap: () => context.push('/food_order', extra: event),
+                ),
+              ),
+              const SizedBox(width: AppDimens.spacingLg),
+              const Spacer(),
             ],
           ),
         ],
@@ -68,7 +108,7 @@ class WorkshopActionGrid extends StatelessWidget {
       onTap: onTap,
       child: Container(
         height: 120,
-        padding: const EdgeInsets.all(AppDimens.spacingLg),
+        padding: const EdgeInsets.all(AppDimens.spacingMd),
         decoration: BoxDecoration(
           color: AppColors.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppDimens.radiusLg),
@@ -80,16 +120,17 @@ class WorkshopActionGrid extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(AppDimens.spacingMd),
+              padding: const EdgeInsets.all(AppDimens.spacingSm),
               decoration: BoxDecoration(
                 color: AppColors.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(AppDimens.radiusMd),
               ),
               child: Icon(icon, color: iconColor, size: 24),
             ),
-            const SizedBox(height: AppDimens.spacingMd),
+            const SizedBox(height: AppDimens.spacingSm),
             Text(
               title,
+              textAlign: TextAlign.center,
               style: AppTextStyles.labelSmall.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppColors.onSurfaceVariant,
