@@ -74,7 +74,6 @@ class StadiumScreen extends StatelessWidget {
           NavigationDestination(icon: Icon(Icons.grid_view, color: AppColors.primary), label: 'EVENT'),
           NavigationDestination(icon: Icon(Icons.map_outlined, color: AppColors.onSurfaceVariant), label: 'CROWD'),
           NavigationDestination(icon: Icon(Icons.confirmation_number_outlined, color: AppColors.onSurfaceVariant), label: 'WALLET'),
-          NavigationDestination(icon: Icon(Icons.fastfood_outlined, color: AppColors.onSurfaceVariant), label: 'ORDERS'),
           NavigationDestination(icon: Icon(Icons.notifications_outlined, color: AppColors.onSurfaceVariant), label: 'ALERTS'),
         ],
       ),
