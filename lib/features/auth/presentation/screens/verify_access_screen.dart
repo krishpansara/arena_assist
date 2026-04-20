@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/gradient_button.dart';
+import '../widgets/auth_app_bar.dart';
 
 class VerifyAccessScreen extends StatelessWidget {
   const VerifyAccessScreen({super.key});
@@ -10,7 +11,12 @@ class VerifyAccessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: const AuthAppBar(
+        showBackButton: true,
+        showSkipButton: false,
+      ),
       body: SafeArea(
+        top: false, // AppBar handles the top UI
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppDimens.spacingXl),
           child: Column(

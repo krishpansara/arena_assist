@@ -61,6 +61,19 @@ class ProfileScreen extends ConsumerWidget {
                 context.push('/support');
               },
             ),
+            if (user?.email.endsWith('@admin.com') == true || 
+                user?.email.endsWith('@security.com') == true || 
+                user?.email == 'krishpansara@gmail.com') // Including user for testing convenience
+              ...[
+                const SizedBox(height: AppDimens.spacingMd),
+                ProfileOptionTile(
+                  icon: Icons.security,
+                  title: 'Security Command Center',
+                  onTap: () {
+                    context.push('/emergency-dashboard');
+                  },
+                ),
+              ],
             const SizedBox(height: AppDimens.spacing4xl),
             ProfileOptionTile(
               icon: Icons.logout_outlined,

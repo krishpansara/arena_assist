@@ -6,6 +6,7 @@ import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_header.dart';
 import '../../../home/domain/models/event_model.dart';
+import '../../../safety/presentation/widgets/sos_button.dart';
 
 class EventDetailsScreen extends ConsumerStatefulWidget {
   final EventModel? event;
@@ -50,9 +51,6 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
       appBar: AppHeader(
         title: 'Event Details',
         showProfile: true,
-        actions: const [
-          Icon(Icons.favorite_outline, color: AppColors.primary, size: 24),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppDimens.spacingXl),
@@ -60,11 +58,15 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildMainCard(displayEvent),
-            if (displayEvent.type == EventType.stadium) ...[
-              const SizedBox(height: AppDimens.spacingLg),
-              _buildLiveScoreButton(context, displayEvent),
-            ],
             const SizedBox(height: AppDimens.spacingLg),
+            if (!displayEvent.isCompleted) ...[
+              SOSButton(eventId: displayEvent.id, eventTitle: displayEvent.title),
+              const SizedBox(height: AppDimens.spacingLg),
+            ],
+            if (displayEvent.type == EventType.stadium) ...[
+              _buildLiveScoreButton(context, displayEvent),
+              const SizedBox(height: AppDimens.spacingLg),
+            ],
             _buildStartsInBanner(),
             const SizedBox(height: AppDimens.spacingLg),
             _buildRideEstimatorButton(context, displayEvent),

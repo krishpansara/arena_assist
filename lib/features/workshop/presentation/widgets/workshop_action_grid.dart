@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:arena_assist/core/theme/theme.dart';
 import 'package:arena_assist/features/home/domain/models/event_model.dart';
+import 'package:arena_assist/features/safety/presentation/widgets/sos_button.dart';
 
 class WorkshopActionGrid extends StatelessWidget {
   final EventModel event;
@@ -13,6 +14,10 @@ class WorkshopActionGrid extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: AppDimens.spacingXl),
       child: Column(
         children: [
+          if (!event.isCompleted) ...[
+            SOSButton(eventId: event.id, eventTitle: event.title),
+            const SizedBox(height: AppDimens.spacingXl),
+          ],
           Row(
             children: [
               Expanded(
@@ -48,9 +53,9 @@ class WorkshopActionGrid extends StatelessWidget {
               Expanded(
                 child: _buildActionBtn(
                   icon: Icons.mic,
-                  title: 'TRANSCRIBE',
+                  title: 'TRANSCRIPTS',
                   iconColor: AppColors.error,
-                  onTap: () => context.push('/live_transcript', extra: event),
+                  onTap: () => context.push('/transcripts_list', extra: event),
                 ),
               ),
             ],
@@ -77,6 +82,7 @@ class WorkshopActionGrid extends StatelessWidget {
               ),
             ],
           ),
+          
           const SizedBox(height: AppDimens.spacingLg),
           Row(
             children: [
@@ -89,7 +95,15 @@ class WorkshopActionGrid extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppDimens.spacingLg),
-              const Spacer(),
+
+              Expanded(
+                child: _buildActionBtn(
+                  icon: Icons.local_taxi,
+                  title: 'PLAN RIDE',
+                  iconColor: AppColors.tertiary,
+                  onTap: () => context.push('/ride-estimator', extra: event.location),
+                ),
+              ),
             ],
           ),
         ],

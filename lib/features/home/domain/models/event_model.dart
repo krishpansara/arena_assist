@@ -52,7 +52,15 @@ class EventModel {
   }
 
   bool get isCompleted {
-    return DateTime.now().isAfter(startTime.add(const Duration(hours: 3)));
+    final now = DateTime.now();
+    final eventDay = DateTime(startTime.year, startTime.month, startTime.day);
+    final today = DateTime(now.year, now.month, now.day);
+    
+    // If the event was on a previous day, it's definitely completed
+    if (eventDay.isBefore(today)) return true;
+    
+    // If it's today, consider it completed after 4 hours from start
+    return now.isAfter(startTime.add(const Duration(hours: 4)));
   }
 
   String get timeStatus {

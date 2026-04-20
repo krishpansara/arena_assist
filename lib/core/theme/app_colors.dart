@@ -53,7 +53,9 @@ class AppColors {
   // ──────────────── Semantic / State ───────────────────────
   static const Color error            = Color(0xFFFF6B6B);
   static const Color errorDim         = Color(0xFFE8457A); // crowd heatmap high-density
+  static const Color errorContainer   = Color(0xFF3B1E1E); // deep red container
   static const Color onError          = Color(0xFF0A0B10);
+  static const Color onErrorContainer = Color(0xFFFFDAD6); // light red text for container
   static const Color success          = tertiary;
   static const Color warning          = Color(0xFFFFB84D);
 

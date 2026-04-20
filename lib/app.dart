@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/theme.dart';
 import 'core/router/app_router.dart';
 import 'features/stadium/data/crowd_density_service.dart';
+import 'features/safety/presentation/widgets/sos_active_overlay.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
@@ -19,6 +20,9 @@ class App extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       routerConfig: goRouter,
+      builder: (context, child) {
+        return SOSActiveOverlay(child: child!);
+      },
     );
   }
 }

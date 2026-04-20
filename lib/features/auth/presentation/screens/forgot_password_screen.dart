@@ -1,3 +1,4 @@
+import 'package:arena_assist/features/auth/presentation/widgets/auth_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -52,28 +53,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     final authState = ref.watch(authControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        automaticallyImplyLeading: false,
-        leadingWidth: 200,
-        leading: GestureDetector(
-          onTap: () => context.pop(),
-          child: Row(
-            children: [
-              const SizedBox(width: AppDimens.spacingLg),
-              const Icon(Icons.arrow_back, color: AppColors.onSurfaceVariant, size: 20),
-              const SizedBox(width: AppDimens.spacingSm),
-              Text(
-                'BACK',
-                style: AppTextStyles.labelSmall.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                  letterSpacing: 1.5,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
+      appBar: const AuthAppBar(
+        showBackButton: true,
+        showSkipButton: false,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppDimens.spacingXl),

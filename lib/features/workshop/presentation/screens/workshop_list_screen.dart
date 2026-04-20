@@ -124,15 +124,21 @@ class _WorkshopCard extends StatelessWidget {
             Text(
               workshop.title,
               style: AppTextStyles.titleLarge.copyWith(fontWeight: FontWeight.bold),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: AppDimens.spacingSm),
             Row(
               children: [
                 const Icon(Icons.location_on_outlined, size: 14, color: AppColors.onSurfaceVariant),
                 const SizedBox(width: 4),
-                Text(
-                  workshop.location,
-                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant),
+                Expanded(
+                  child: Text(
+                    workshop.location,
+                    style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),

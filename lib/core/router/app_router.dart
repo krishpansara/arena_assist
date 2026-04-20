@@ -31,7 +31,9 @@ import 'package:arena_assist/features/food/presentation/screens/food_screen.dart
 import 'package:arena_assist/features/stadium/presentation/screens/live_score_screen.dart';
 import 'package:arena_assist/features/transport/presentation/screens/ride_estimator_screen.dart';
 import 'package:arena_assist/features/transcript/presentation/screens/live_transcript_screen.dart';
+import 'package:arena_assist/features/transcript/presentation/screens/transcript_list_screen.dart';
 import 'package:arena_assist/features/alerts/presentation/screens/alerts_screen.dart';
+import 'package:arena_assist/features/safety/presentation/screens/emergency_dashboard_screen.dart';
 
 EventModel? _parseEvent(Object? extra) {
   if (extra is EventModel) return extra;
@@ -60,8 +62,11 @@ class PlaceholderScreen extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(body: Center(child: Text(title)));
 }
 
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: '/',
     redirect: (context, state) {
       final authState = ref.read(authStateChangesProvider);
@@ -228,6 +233,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         if (event == null) return const PlaceholderScreen('Invalid Event Data');
         return LiveTranscriptScreen(event: event);
       },
+    ),
+    GoRoute(
+      path: '/transcripts_list',
+      builder: (context, state) {
+        final event = _parseEvent(state.extra);
+        if (event == null) return const PlaceholderScreen('Invalid Event Data');
+        return TranscriptListScreen(event: event);
+      },
+    ),
+    GoRoute(
+      path: '/emergency-dashboard',
+      builder: (context, state) => const EmergencyDashboardScreen(),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {

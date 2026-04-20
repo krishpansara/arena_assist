@@ -74,7 +74,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final authState = ref.watch(authControllerProvider);
 
     return Scaffold(
-      appBar: const AuthAppBar(),
+      appBar: const AuthAppBar(
+        showBackButton: true,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppDimens.spacingXl),
         child: Column(

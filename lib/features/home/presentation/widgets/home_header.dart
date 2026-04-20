@@ -8,6 +8,7 @@ class HomeHeader extends StatelessWidget {
 
   const HomeHeader({
     super.key,
+    
     required this.userName,
     required this.userAvatarUrl,
     required this.onTicketPressed,
