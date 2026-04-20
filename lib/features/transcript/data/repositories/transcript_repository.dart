@@ -24,14 +24,20 @@ class TranscriptRepository {
     }
   }
 
-  /// Retrieves a stream of transcripts for a specific event
-  Stream<List<TranscriptRecord>> getTranscriptsForEvent(String eventId) {
+  /// Retrieves a stream of transcripts for a specific event and user
+  Stream<List<TranscriptRecord>> getTranscriptsForEvent(String eventId, String userId) {
     return _transcripts
         .where('event_id', isEqualTo: eventId)
-        .orderBy('updated_at', descending: true)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) => TranscriptRecord.fromFirestore(doc)).toList();
+      final records = snapshot.docs
+          .map((doc) => TranscriptRecord.fromFirestore(doc))
+          .where((record) => record.userId == userId)
+          .toList();
+      
+      // Sort locally to avoid needing a Firestore composite index
+      records.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+      return records;
     });
   }
 

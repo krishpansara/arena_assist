@@ -6,6 +6,7 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:uuid/uuid.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../../../../features/auth/presentation/providers/auth_provider.dart';
 
 import '../../data/repositories/transcript_repository.dart';
 
@@ -54,13 +55,14 @@ class TranscriptNotifier extends StateNotifier<TranscriptState> {
   final TranscriptRepository _repository;
   final SpeechToText _speechToText = SpeechToText();
   final String eventId;
+  final String userId;
   String _recordId = '';
   bool _userIntendsToListen = false;
   
   // Timer for auto-saving less frequently to save tokens/Firestore writes
   Timer? _autoSaveTimer;
 
-  TranscriptNotifier(this._repository, this.eventId)
+  TranscriptNotifier(this._repository, this.eventId, this.userId)
       : super(TranscriptState()) {
     _initSpeech();
   }
@@ -284,6 +286,7 @@ class TranscriptNotifier extends StateNotifier<TranscriptState> {
     final newRecord = TranscriptRecord(
       id: _recordId,
       eventId: eventId,
+      userId: userId,
       text: fullText,
       updatedAt: DateTime.now(),
       summary: state.record?.summary,
@@ -319,6 +322,7 @@ class TranscriptNotifier extends StateNotifier<TranscriptState> {
         final updatedRecord = TranscriptRecord(
           id: _recordId,
           eventId: eventId,
+          userId: userId,
           text: insights['clean_transcript'] ?? fullText,
           updatedAt: DateTime.now(),
           summary: insights['summary'],
@@ -369,5 +373,7 @@ class TranscriptNotifier extends StateNotifier<TranscriptState> {
 
 final transcriptProvider = StateNotifierProvider.family<TranscriptNotifier, TranscriptState, String>((ref, eventId) {
   final repository = ref.watch(transcriptRepositoryProvider);
-  return TranscriptNotifier(repository, eventId);
+  final authState = ref.watch(authStateChangesProvider);
+  final userId = authState.valueOrNull?.uid ?? '';
+  return TranscriptNotifier(repository, eventId, userId);
 });

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class TranscriptRecord {
   final String id;
   final String eventId;
+  final String userId;
   final String text;
   final DateTime updatedAt;
   final DateTime? completedAt; // If true, the session is over
@@ -13,6 +14,7 @@ class TranscriptRecord {
   TranscriptRecord({
     required this.id,
     required this.eventId,
+    required this.userId,
     required this.text,
     required this.updatedAt,
     this.completedAt,
@@ -26,6 +28,7 @@ class TranscriptRecord {
     return TranscriptRecord(
       id: doc.id,
       eventId: data['event_id'] ?? '',
+      userId: data['user_id'] ?? '',
       text: data['text'] ?? '',
       updatedAt: (data['updated_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
       completedAt: (data['completed_at'] as Timestamp?)?.toDate(),
@@ -38,6 +41,7 @@ class TranscriptRecord {
   Map<String, dynamic> toMap() {
     return {
       'event_id': eventId,
+      'user_id': userId,
       'text': text,
       'updated_at': Timestamp.fromDate(updatedAt),
       if (completedAt != null) 'completed_at': Timestamp.fromDate(completedAt!),
@@ -50,6 +54,7 @@ class TranscriptRecord {
   TranscriptRecord copyWith({
     String? id,
     String? eventId,
+    String? userId,
     String? text,
     DateTime? updatedAt,
     DateTime? completedAt,
@@ -60,6 +65,7 @@ class TranscriptRecord {
     return TranscriptRecord(
       id: id ?? this.id,
       eventId: eventId ?? this.eventId,
+      userId: userId ?? this.userId,
       text: text ?? this.text,
       updatedAt: updatedAt ?? this.updatedAt,
       completedAt: completedAt ?? this.completedAt,
