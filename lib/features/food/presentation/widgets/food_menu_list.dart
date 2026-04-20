@@ -1,56 +1,64 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/theme.dart';
+import '../../domain/models/food_models.dart';
+import '../providers/cart_provider.dart';
 
-class FoodMenuList extends StatelessWidget {
+class FoodMenuList extends ConsumerWidget {
   const FoodMenuList({super.key});
 
+  static final List<FoodItem> _menuItems = [
+    FoodItem(
+      id: 'burger_1',
+      title: 'THE BLITZ DOUBLE BURGER',
+      price: 18.00,
+      description: 'Double wagyu beef, aged cheddar, caramelized onions, and secret blitz sauce on a toasted brioche bun.',
+      badge: '25 MIN WAIT',
+    ),
+    FoodItem(
+      id: 'nachos_1',
+      title: 'SUPREME NACHO PILE',
+      price: 14.50,
+      description: 'Crispy chips, beer cheese, pico de gallo, and fresh jalapeños.',
+    ),
+    FoodItem(
+      id: 'hotdog_1',
+      title: 'ARENA CLASSIC DOG',
+      price: 9.50,
+      description: 'All-beef frank, stadium mustard, kraut on a steamed bun.',
+    ),
+    FoodItem(
+      id: 'ipa_1',
+      title: 'HOME TURF IPA',
+      price: 12.50,
+      description: 'Local craft brew, with citrus notes and a crisp finish.',
+    ),
+    FoodItem(
+      id: 'soda_1',
+      title: 'FOUNTAIN SODA',
+      price: 6.50,
+      description: 'Unlimited self-serve bites. Refillable at any station.',
+    ),
+    FoodItem(
+      id: 'popcorn_1',
+      title: 'STADIUM POPCORN',
+      price: 8.50,
+      description: 'Large tub of buttery, salty movie-style popcorn.',
+    ),
+  ];
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        _buildItemCard(
-          title: 'THE BLITZ DOUBLE BURGER',
-          price: '\$18.00',
-          description: 'Double wagyu beef, aged cheddar, caramelized onions, and secret blitz sauce on a toasted brioche bun.',
-          badgeText: '25 MIN WAIT',
-        ),
-        _buildItemCard(
-          title: 'SUPREME NACHO PILE',
-          price: '\$14.50',
-          description: 'Crispy chips, beer cheese, pico de gallo, and fresh jalapeños.',
-        ),
-        _buildItemCard(
-          title: 'ARENA CLASSIC DOG',
-          price: '\$9.50',
-          description: 'All-beef frank, stadium mustard, kraut on a steamed bun.',
-        ),
+        ..._menuItems.map((item) => _buildItemCard(context, ref, item)),
         _buildRefillBanner(),
-        _buildItemCard(
-          title: 'HOME TURF IPA',
-          price: '\$12.50',
-          description: 'Local craft brew, with citrus notes and a crisp finish.',
-        ),
-        _buildItemCard(
-          title: 'FOUNTAIN SODA',
-          price: '\$6.50',
-          description: 'Unlimited self-serve bites. Refillable at any station.',
-        ),
-        _buildItemCard(
-          title: 'STADIUM POPCORN',
-          price: '\$8.50',
-          description: 'Large tub of buttery, salty movie-style popcorn.',
-        ),
         const SizedBox(height: 100), // Padding for the bottom checkout bar
       ],
     );
   }
 
-  Widget _buildItemCard({
-    required String title,
-    required String price,
-    required String description,
-    String? badgeText,
-  }) {
+  Widget _buildItemCard(BuildContext context, WidgetRef ref, FoodItem item) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppDimens.spacingXl, vertical: AppDimens.spacingMd),
       decoration: BoxDecoration(
@@ -78,7 +86,7 @@ class FoodMenuList extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   Icon(Icons.fastfood_outlined, size: 48, color: AppColors.onSurfaceVariant.withValues(alpha: 0.5)),
-                  if (badgeText != null)
+                  if (item.badge != null)
                     Positioned(
                       top: AppDimens.spacingMd,
                       left: AppDimens.spacingMd,
@@ -89,7 +97,7 @@ class FoodMenuList extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          badgeText,
+                          item.badge!,
                           style: AppTextStyles.labelSmall.copyWith(
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
@@ -107,7 +115,7 @@ class FoodMenuList extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        price,
+                        '₹${item.price.toStringAsFixed(2)}',
                         style: AppTextStyles.labelMedium.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -126,22 +134,31 @@ class FoodMenuList extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  item.title,
                   style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: AppDimens.spacingXs),
                 Text(
-                  description,
+                  item.description,
                   style: AppTextStyles.bodyMedium.copyWith(color: AppColors.onSurfaceVariant),
                 ),
                 const SizedBox(height: AppDimens.spacingLg),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      ref.read(cartProvider.notifier).addItem(item);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${item.title} added to order'),
+                          duration: const Duration(seconds: 1),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: badgeText != null ? const Color(0xFF8B5CF6) : AppColors.surfaceContainerHighest,
-                      foregroundColor: badgeText != null ? Colors.white : AppColors.onSurface,
+                      backgroundColor: item.badge != null ? const Color(0xFF8B5CF6) : AppColors.surfaceContainerHighest,
+                      foregroundColor: item.badge != null ? Colors.white : AppColors.onSurface,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(AppDimens.radiusMd),
                       ),
@@ -150,12 +167,12 @@ class FoodMenuList extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          badgeText != null ? Icons.shopping_cart : Icons.add,
+                          item.badge != null ? Icons.shopping_cart : Icons.add,
                           size: 16,
-                          color: badgeText != null ? Colors.white : AppColors.onSurface,
+                          color: item.badge != null ? Colors.white : AppColors.onSurface,
                         ),
                         const SizedBox(width: 8),
-                        Text(badgeText != null ? 'ADD TO ORDER' : 'ADD ITEM'),
+                        Text(item.badge != null ? 'ADD TO ORDER' : 'ADD ITEM'),
                       ],
                     ),
                   ),
@@ -201,7 +218,7 @@ class FoodMenuList extends StatelessWidget {
           ),
           const SizedBox(height: AppDimens.spacingXs),
           Text(
-            'Upgrade any drink to a Souvenir Cup for just \$4.50 extra.',
+            'Upgrade any drink to a Souvenir Cup for just ₹4.50 extra.',
             style: AppTextStyles.bodyMedium.copyWith(color: AppColors.onSurfaceVariant),
           ),
           const SizedBox(height: AppDimens.spacingLg),

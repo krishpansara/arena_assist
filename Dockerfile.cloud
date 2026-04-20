@@ -1,0 +1,36 @@
+# --- Stage 1: Build Flutter Web ---
+FROM ghcr.io/cirruslabs/flutter:3.41.6 AS flutter-builder
+
+WORKDIR /app
+COPY . .
+
+# Resolve dependencies and build
+RUN flutter pub get
+RUN flutter build web --release
+
+# --- Stage 2: Build Python Backend & Serve ---
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install backend dependencies
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy backend code
+COPY backend/ ./backend/
+
+# Copy the built Flutter app from Stage 1 into the static directory expected by FastAPI
+COPY --from=flutter-builder /app/build/web/ ./backend/web_build/
+
+# Set the working directory to where main.py is located
+WORKDIR /app/backend
+
+# Ensure python can find the 'backend' parent package for imports
+ENV PYTHONPATH=/app
+
+# Expose the port Cloud Run expects
+EXPOSE 8080
+
+# Run the unified FastAPI server
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]

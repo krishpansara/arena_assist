@@ -84,7 +84,7 @@ def init_llm():
         try:
             genai.configure(api_key=gemini_key)
             # Using 1.5-flash as it's the current stable model
-            gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+            gemini_model = genai.GenerativeModel('gemini-2.5-flash')
             print("✅ [LLM] Gemini client initialized successfully.")
         except Exception as e:
             print("❌ [LLM INIT ERROR - Gemini]:", str(e))

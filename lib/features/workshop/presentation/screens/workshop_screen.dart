@@ -7,6 +7,7 @@ import 'package:arena_assist/features/workshop/presentation/widgets/workshop_act
 import 'package:arena_assist/features/workshop/presentation/widgets/workshop_upcoming_sessions.dart';
 import 'package:arena_assist/features/workshop/presentation/widgets/assistant_pulse.dart';
 import 'package:arena_assist/features/workshop/presentation/widgets/workshop_speaker_bios.dart';
+import 'package:arena_assist/features/support/presentation/widgets/assistant_fab.dart';
 
 class WorkshopScreen extends StatelessWidget {
   final EventModel event;
@@ -46,6 +47,7 @@ class WorkshopScreen extends StatelessWidget {
           ],
         ),
       ),
+      floatingActionButton: AssistantFab(event: event),
     );
   }
 }

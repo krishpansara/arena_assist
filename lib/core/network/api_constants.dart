@@ -1,24 +1,30 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiConstants {
-  // If you are using a REAL Android device, replace this with your machine's local IP
-  // You can find it by running 'ipconfig' (Windows) or 'ifconfig' (Mac/Linux)
-  // Example: '192.168.1.5'
-  static const String _machineIp = '10.0.2.2'; // Default to emulator alias
-  
   // Base URL for the Python backend
   static String get pythonBaseUrl {
-    // If running on Web, use localhost
+    // 1. Priority: Explicit BACKEND_URL from .env
+    final explicitUrl = dotenv.maybeGet('BACKEND_URL');
+    if (explicitUrl != null && explicitUrl.isNotEmpty) {
+      return explicitUrl;
+    }
+
+    // 2. Priority: Web handling
     if (kIsWeb) {
-      return 'http://localhost:8000';
+      final origin = Uri.base.origin;
+      if (origin.contains('localhost')) {
+        return 'http://localhost:8000';
+      }
+      return origin;
     }
     
-    // For Mobile (Android/iOS)
+    // 3. Priority: Mobile handling with MACHINE_IP
+    final machineIp = dotenv.get('MACHINE_IP', fallback: '10.0.2.2');
+    
     if (Platform.isAndroid) {
-      // 10.0.2.2 only works for the Android Emulator.
-      // For a REAL device, you must use your machine's local network IP.
-      return 'http://$_machineIp:8000';
+      return 'http://$machineIp:8000';
     }
     
     // Default for iOS / Desktop / others
@@ -31,6 +37,7 @@ class ApiConstants {
   
   // Endpoints
   static const String analyzeEvent = '$apiV1/analyze';
+  static const String analyzeChat = '$apiV1/chat';
   
   // Helper to get full URL
   static String fullUrl(String endpoint) => '$pythonBaseUrl$endpoint';

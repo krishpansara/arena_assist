@@ -1,0 +1,17 @@
+# Ignore unnecessary files
+.git
+.gitignore
+node_modules/
+build/
+.dart_tool/
+android/
+ios/
+linux/
+macos/
+windows/
+test/
+
+# IMPORTANT: DO NOT IGNORE lib or web
+!lib/**
+!web/**
+!pubspec.yaml

@@ -9,6 +9,7 @@ import 'package:arena_assist/features/home/presentation/widgets/event_hero_card.
 import 'package:arena_assist/features/auth/presentation/providers/auth_provider.dart';
 import 'package:arena_assist/features/home/presentation/providers/event_provider.dart';
 import 'package:arena_assist/features/home/domain/models/event_model.dart';
+import 'package:arena_assist/features/support/presentation/widgets/assistant_fab.dart';
 
 
 class HomeScreen extends ConsumerWidget {

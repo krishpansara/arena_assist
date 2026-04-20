@@ -1,11 +1,22 @@
+import 'package:arena_assist/features/home/domain/models/event_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/theme.dart';
+import '../providers/cart_provider.dart';
+import '../screens/food_checkout_screen.dart';
 
-class FoodCheckoutBar extends StatelessWidget {
-  const FoodCheckoutBar({super.key});
+
+class FoodCheckoutBar extends ConsumerWidget {
+  final EventModel? event;
+  const FoodCheckoutBar({super.key, this.event});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final totalAmount = ref.watch(cartTotalAmountProvider);
+    final totalItems = ref.watch(cartTotalItemsProvider);
+
+    if (totalItems == 0) return const SizedBox.shrink();
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppDimens.spacingLg, vertical: AppDimens.spacingMd),
       decoration: BoxDecoration(
@@ -37,7 +48,7 @@ class FoodCheckoutBar extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  '2',
+                  '$totalItems',
                   style: AppTextStyles.titleMedium.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -55,14 +66,21 @@ class FoodCheckoutBar extends StatelessWidget {
                   style: AppTextStyles.labelSmall.copyWith(color: AppColors.onSurfaceVariant),
                 ),
                 Text(
-                  '₹32.50',
+                  '₹${totalAmount.toStringAsFixed(2)}',
                   style: AppTextStyles.titleLarge.copyWith(fontWeight: FontWeight.w900),
                 ),
               ],
             ),
             const Spacer(),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => FoodCheckoutScreen(event: event),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.black,

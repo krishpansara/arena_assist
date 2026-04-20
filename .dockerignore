@@ -1,0 +1,15 @@
+.dart_tool/
+.git/
+.idea/
+.vscode/
+android/
+ios/
+linux/
+macos/
+windows/
+test/
+venv/
+backend/venv/
+backend/__pycache__/
+__pycache__/
+build/

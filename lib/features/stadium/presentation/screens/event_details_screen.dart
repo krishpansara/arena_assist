@@ -7,6 +7,7 @@ import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/app_header.dart';
 import '../../../home/domain/models/event_model.dart';
 import '../../../safety/presentation/widgets/sos_button.dart';
+import '../../../support/presentation/widgets/assistant_fab.dart';
 
 class EventDetailsScreen extends ConsumerStatefulWidget {
   final EventModel? event;
@@ -83,6 +84,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
           ],
         ),
       ),
+      floatingActionButton: AssistantFab(event: displayEvent),
     );
   }
 

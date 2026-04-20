@@ -34,6 +34,7 @@ import 'package:arena_assist/features/transcript/presentation/screens/live_trans
 import 'package:arena_assist/features/transcript/presentation/screens/transcript_list_screen.dart';
 import 'package:arena_assist/features/alerts/presentation/screens/alerts_screen.dart';
 import 'package:arena_assist/features/safety/presentation/screens/emergency_dashboard_screen.dart';
+import 'package:arena_assist/features/support/presentation/screens/chat_screen.dart';
 
 EventModel? _parseEvent(Object? extra) {
   if (extra is EventModel) return extra;
@@ -245,6 +246,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     GoRoute(
       path: '/emergency-dashboard',
       builder: (context, state) => const EmergencyDashboardScreen(),
+    ),
+    GoRoute(
+      path: '/ai-assistant',
+      builder: (context, state) {
+        final event = _parseEvent(state.extra);
+        return ChatScreen(event: event);
+      },
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {

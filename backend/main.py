@@ -2,6 +2,7 @@ import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Optional
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
@@ -14,7 +15,8 @@ from backend.scraper import scrape_event_website
 from backend.llm import init_llm
 from backend.event_analyzer import synthesize_event_data
 from backend.transcript_summarizer import generate_transcript_insights
-from backend.database import init_firestore, save_event_to_firestore
+from backend.database import init_firestore, save_event_to_firestore, save_chat_message, get_chat_history
+from backend.chatbot import get_chatbot_response
 
 
 # -- Lifespan (replaces deprecated @app.on_event) -----------------------------
@@ -61,10 +63,25 @@ class AnalyzeResponse(BaseModel):
     doc_id: str | None
     data: dict
 
+class ChatRequest(BaseModel):
+    user_id: str
+    event_id: str = "general"
+    message: str
+    context: Optional[str] = ""
+
+class ChatResponse(BaseModel):
+    status: str
+    reply: str
+
+
+
+import os
+from fastapi.staticfiles import StaticFiles
 
 # -- Endpoints ----------------------------------------------------------------
+import re
 
-@app.get("/")
+@app.get("/api/health")
 def health_check():
     return {"status": "Arena Assist API is running", "version": "1.0.0"}
 
@@ -75,7 +92,7 @@ async def analyze_event(req: AnalyzeRequest):
     Main pipeline: URL -> Scrape -> Gemini LLM Synthesis -> Firestore -> Response
     """
 
-    print("recahed")
+    print(f"\n[API] /analyze received: {req.url}")
     
     if req.type == "name":
         raise HTTPException(
@@ -88,19 +105,24 @@ async def analyze_event(req: AnalyzeRequest):
         url = "https://" + url
 
     # Step 1: Scrape
-    print(f"\n[SCRAPER] Fetching: {url}")
+    print(f"[SCRAPER] Starting scrape for: {url}")
     try:
         raw_text = await scrape_event_website(url)
+        if raw_text.startswith("Error fetching content:"):
+             print(f"❌ SCRAPE ERROR: {raw_text}")
+             raise HTTPException(status_code=502, detail=raw_text)
     except Exception as e:
+        print(f"❌ SCRAPE EXCEPTION: {e}")
         raise HTTPException(status_code=502, detail=f"Failed to fetch the event website: {e}")
 
     if not raw_text or len(raw_text) < 100:
+        print(f"⚠️ SCRAPE WARNING: Too little content ({len(raw_text) if raw_text else 0} chars)")
         raise HTTPException(
             status_code=422,
             detail="Page returned too little content. It may require JavaScript rendering.",
         )
 
-    print(f"[SCRAPER] Got {len(raw_text):,} characters.")
+    print(f"[SCRAPER] Successfully captured {len(raw_text):,} characters.")
 
     # Step 2: LLM Synthesis
     print("[LLM] Sending to Gemini...")
@@ -133,6 +155,54 @@ async def get_transcript_insights(req: TranscriptRequest):
         print("❌ TRANSCRIPT LLM ERROR:", str(e))
         raise HTTPException(status_code=500, detail=f"Failed to generate insights: {e}")
 
+@app.post("/api/v1/chat", response_model=ChatResponse)
+async def chat_with_assistant(req: ChatRequest):
+    """
+    Chat endpoint for the AI Assistant. Supports URL scraping for context.
+    """
+    if not req.message.strip():
+        raise HTTPException(status_code=400, detail="Message cannot be empty.")
+
+    try:
+        print(f"\n[CHAT] Processing message from user {req.user_id} for event {req.event_id}")
+        
+        # 1. Detect and scrape URLs in the message
+        url_match = re.search(r'https?://\S+', req.message)
+        scraped_context = ""
+        if url_match:
+            detected_url = url_match.group(0)
+            print(f"[CHAT] Detected URL: {detected_url}. Scrapping...")
+            scraped_context = await scrape_event_website(detected_url)
+            print(f"[CHAT] Scraped {len(scraped_context)} chars from URL.")
+
+        # 2. Combine contexts
+        full_context = f"{req.context}\n\n[SCRAPED WEB CONTENT]:\n{scraped_context}" if scraped_context else req.context
+
+        # 3. Fetch history
+        history = await get_chat_history(req.user_id, req.event_id)
+        
+        # 4. Save user message
+        await save_chat_message(req.user_id, req.event_id, "user", req.message)
+        
+        # 5. Get AI response
+        reply = get_chatbot_response(req.message, history, full_context)
+        
+        # 6. Save AI response
+        await save_chat_message(req.user_id, req.event_id, "assistant", reply)
+        
+        print(f"[CHAT] Reply sent successfully.")
+        return ChatResponse(status="success", reply=reply)
+    except Exception as e:
+        print("❌ CHAT ERROR:", str(e))
+        raise HTTPException(status_code=500, detail=f"Assistant failed to reply: {e}")
+
+# Mount static files for Flutter Web
+if os.path.exists("web_build"):
+    app.mount("/", StaticFiles(directory="web_build", html=True), name="frontend")
+else:
+    @app.get("/")
+    def fallback_root():
+        return {"message": "Arena Assist API - Frontend not found at web_build/"}
 
 if __name__ == "__main__":
     import uvicorn
